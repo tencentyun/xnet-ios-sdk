@@ -8,7 +8,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "xnet"
-  spec.version      = "1.1.1"
+  spec.version      = "1.1.2"
   spec.license       = { :type => 'MIT' }
   spec.summary      = "腾讯云xp2p框架"
   spec.description  = "高级版的点对点P2P(Peer-to-Peer)网络系统，起源于为视频直播、点播节省带宽"
@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   spec.author             = { "TencentCloud" => "XP2P" }
   spec.source       = { :git => "http://git.code.oa.com/p2p/xnet-ios-sdk.git", :tag => spec.version.to_s }
   spec.prepare_command = <<-CMD
-    curl -O https://xnet-ios-1255868781.cos.ap-guangzhou.myqcloud.com/release/1.0/EGAME/v6.1.7/a1ddc4d981604f83dfa0683858e433b5f9602bce unzip -o TencentXP2P.framework.zip
+    curl -O https://xnet-ios-1255868781.cos.ap-guangzhou.myqcloud.com/release/1.0/EGAME/v6.1.7/a1ddc4d981604f83dfa0683858e433b5f9602bce/ unzip -o TencentXP2P.framework.zip
                    CMD
   spec.requires_arc = true
   spec.ios.deployment_target = "9.0"
