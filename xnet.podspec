@@ -8,7 +8,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "xnet"
-  spec.version      = "1.1.3"
+  spec.version      = "1.1.3-egame"
   spec.license       = { :type => 'MIT' }
   spec.summary      = "腾讯云xp2p框架"
   spec.description  = "高级版的点对点P2P(Peer-to-Peer)网络系统，起源于为视频直播、点播节省带宽"
