@@ -14,9 +14,9 @@ SDK支持多实例，即支持同时开启多个点播p2p。
 #### 腾讯云对接人员会提供iOS项目的Bundle identifier，并索取App ID、App Key、App Secret Key，如以下形式：
 
         Bundle identifier：com.qcloud.helloworld
-        NSString *appID = @"5919174f79883b4648a90bdd";
-        NSString *key = @"3qRcwO0Zn1Gm8t2O";
-        NSString *secret = @"Ayg29EDt1AbCXJ9t6HoQNbZUf6cPuV5J";
+        NSString *appID = @"your_app_id";
+        NSString *key = @"$your_app_key";
+        NSString *secret = @"$your_app_secret";
 
 #### ios当前支持的架构
 
@@ -24,149 +24,75 @@ armv7 armv7s arm64
 
 #### 具体步骤
 
-- 解压解压TencentXP2P.zip并得到TencentXP2P.framework，并在项目中引用
+- 解压解压xnet.zip并得到xnet.framework，并在项目中引用
 
-- 在App启动时初始化XP2PModule
+- 在App启动时初始化XNet
 
 首先需要初始化p2p sdk，最好在app启动后就作初始化。
 
 ```
-		// Example: 程序的入口AppDelegate.m
- 		#import "AppDelegate.h"
- 		#import <TencentXP2P/TencentXP2P.h>
- 		@implementation AppDelegate
- 		- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
- 		{
- 			// do something other...
+// Example: 程序的入口AppDelegate.m
+#import "AppDelegate.h"
+#import <xnet/XNet.h>
+@implementation AppDelegate
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+    // do something other...
 
-            //下面的接口调用可以开启SDK log的打印，不调用该接口，log打印默认不开启
-            [XP2PModule enableDebug:LOG_ALL]
+    // enableDebug接口调用可以开启SDK log的打印，不调用该接口，log打印默认不开启
+    // [XNet enableDebug]
 
-            //拦截SDK输出日志
-            [XP2PModule setLogger:self];
+    NSString *appID = @"your app id";
+    NSString *key = @"your app key";
+    NSString *secret = @"your app secret";
+    [XNet initWith:appID appKey:key appSecretKey:secret];
 
- 			// 初始化P2P
- 			NSString *appID = @"";
- 			NSString *key = @"";
- 			NSString *secret = @"";
- 			[XP2PModule init:appID appKey:key appSecretKey:secret];
+    return YES;
+}
 
- 			return YES;
- 		}
-
-        - (void)onLogPrint:(NSString*)msg {
-            //这里能够收到SDK输出的日志
-        }
-
- 		@end
-
-```
-
-- 加载一个频道
-
-```
-		- (int)startPlay:(NSString*)url
-		{
- 			NSString* p2pUrl = [XP2PModule getVodUrl:url];
-			// 直接播放此url即可
-			[_player startPlay:p2pUrl];
-    		return EXIT_SUCCESS;
-		}
-```
-
-- 卸载一个频道
-
-```
-		- (int)stopPlay
-		{
-			// 播放器链接断开以后 SDK内部会自动释放频道相关的资源, 直接关闭播放器即可
-			[_player stopPlay];
-			return EXIT_SUCCESS;
-		}
-```
-
-- 暂停频道
-
-```
-		- (int)pause:(NSString*)url
-		{
-			[XP2PModule pause:url];
-			return EXIT_SUCCESS;
-		}
-```
-
-- 恢复频道
-
-```
-		- (int)resume:(NSString*)url
-		{
-			[XP2PModule resume:url];
-			return EXIT_SUCCESS;
-		}
-```
-
-- 数据统计方法
-    提供CDN和P2P的流量消耗获取，因为是累积统计，在获取后需要重置该统计，客户端可在EventDelegate的onEvent中监听STATISTICS事件获取每次刷新的数据
-
-```
-		NSString* statStr = [XP2PModule getStat:url];
-		if (statStr != nil) {
-			// 解析对应流的cdn流量和p2p流量 flow.cdnBytes & flow.p2pBytes
-		}
-```
-
-#### 以下是一使用实例，请参考
-
-```
-#import <TencentXP2P/TencentXP2P.h>
-
-@interface TXP2PLivePlayer()<EventDelegate>
 @end
+ ```
 
-@implementation TXP2PLivePlayer
-{
-	
-}
+##### 播放控制（start/stop）
 
-- (int)startPlay:(NSString*)url {
-    
-    NSString* p2pUrl = [XP2PModule getLiveUrl:url];
-	// 直接播放此url即可
-	[_player startPlay:p2pUrl];
-    return 0;
-}
+- start 启动一个点播p2p：
 
-- (int)stopPlay
-{			
-	// 播放器链接断开以后 SDK内部会自动释放频道相关的资源, 直接关闭播放器即可
-	[_player stopPlay];
-    return [super  stopPlay];
-}
+首先拿到点播视频的url，通过以下方式拼接出p2pUrl，通过http请求p2pUrl即可。
+```
+    // 例如：url = http://domain/path/to/some.file?params=xxx
+    // 变成：p2pUrl = [XNet proxyOf:@"vod.p2p.com"]/domain/path/to/some.file?params=xxx
 
-- (int)pause:(NSString*)url
-{
-	[XP2PModule pause:url];
-	return EXIT_SUCCESS;
-}
-
-- (int)resume:(NSString*)url
-{
-	[XP2PModule resume:url];
-	return EXIT_SUCCESS;
-}
-@end
+    NSString *host = @"vod.p2p.com";
+    if ([originUrl rangeOfString:@"m3u8"].location != NSNotFound) {
+        host = @"hls.vod.p2p.com";
+    }
+    NSString* p2pUrl = [originUrl stringByReplacingOccurrencesOfString:@"http://" withString: [XNet proxyOf:host]];
 ```
 
-#### 拦截SDK日志输出
-```
-//在sdk初始化之前设置日志输出回调，之后日志会在XP2P线程中回调onLogPrint:(NSString*)msg
-[XP2PModule setLogger:id<Logger>];
+需要注意，这里区分出单码率视频格式和多码率视频格式。  
+单码率格式：mp4/flv等单个文件的视频格式。    
+多码率格式：hls/dash。
+
+对于单码率格式，统一使用host是"vod.p2p.com"。   
+对于hls格式，使用host是"hls.vod.p2p.com"，只需对m3u8文件的url根据上述方式拼接即可，其中的ts文件的url已经由sdk内部处理并写入m3u8文件中。
+如果有防盗链需求，照常添加到url的query部分即可（m3u8的url和ts的url都可以）。
+
+- stop 关闭一个点播p2p：
+
+断开start时启动的http连接即可。
+
+- **resume(重要) 恢复xp2p sdk**
+
+从后台回到前台时必须调用resume，否则在播放器在后台阶段iOS可能会关闭链接，此时向sdk发起请求会出错。需要保证在播放器重新发起请求之前调用resume.
 
 ```
-
-#### 网络状态变更
+    [XNet resume];
 ```
-	//在网络状态变化时通过该接口通知到SDK
-	[XP2PModule changeNetworkTo:NetState];
 
-```
+#### 流量统计
+
+目前可通过运营网站查看，后续sdk会提供接口方便实时查询单机统计。
+
+#### 播放器缓存
+
+建议播放器缓存设置一个比较小的值，建议15s以内。
