@@ -40,26 +40,16 @@ static NSString* host = @"";
 }
 
 + (void)enableDebug {
-    XP2PService::enableDebug();
+    XP2PService::setLogger(
+                           [](const char* msg) { NSLog(@"[debug][XP2P]%@", [NSString stringWithUTF8String:msg]); },
+                           [](const char* msg) { NSLog(@"[info][XP2P]%@", [NSString stringWithUTF8String:msg]); },
+                           [](const char* msg) { NSLog(@"[trace][XP2P]%@", [NSString stringWithUTF8String:msg]); },
+                           [](const char* msg) { NSLog(@"[warn][XP2P]%@", [NSString stringWithUTF8String:msg]); },
+                           [](const char* msg) { NSLog(@"[error][XP2P]%@", [NSString stringWithUTF8String:msg]); });
 }
 
 + (void)disableDebug {
-    XP2PService::disableDebug();
-}
-
-static void defaultLog(int prio, const char* msg) {
-    if ([_loggger conformsToProtocol:@protocol(Logger)] &&
-        [_loggger respondsToSelector:@selector(onLogPrint:)]) {
-        NSString* message = [[NSString alloc] initWithCString:msg encoding:NSASCIIStringEncoding];
-        [_loggger onLogPrint:message];
-    }
-}
-
-+ (void)setLogger:(id<Logger>)delegate {
-    _loggger = delegate;
-    if (_loggger != nil) {
-        XP2PService::setLogger(defaultLog);
-    }
+    XP2PService::setLogger(nullptr, nullptr, nullptr, nullptr, nullptr);
 }
 
 + (void)alias:(NSString*)host of:(NSString*)name {

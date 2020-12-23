@@ -22,7 +22,6 @@ __attribute__((visibility("default")))
 + (NSString*)version;
 + (void)enableDebug;
 + (void)disableDebug;
-+ (void)setLogger:(id<Logger>)delegate;
 + (int)resume;
 + (NSString*)host;
 + (NSString*)proxyOf:(NSString*)domain;
