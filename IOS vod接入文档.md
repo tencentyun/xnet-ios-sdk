@@ -1,6 +1,5 @@
 ## 腾讯云 X-P2P Vod IOS SDK 接入文档。
 
-
 ### 介绍
 
 腾讯云X-P2P解决方案，可帮助用户直接使用经过大规模验证的直播、点播、文件分发服务，通过经商用验证的P2P服务大幅节省带宽成本，提供更优质的用户体验。开发者可通过SDK中简洁的接口快速同自有应用集成，实现IOS设备上的P2P加速功能。
@@ -58,15 +57,23 @@ armv7 armv7s arm64
 - start 启动一个点播p2p：
 
 首先拿到点播视频的url，通过以下方式拼接出p2pUrl，通过http请求p2pUrl即可。
+
 ```
     // 例如：url = http://domain/path/to/some.file?params=xxx
     // 变成：p2pUrl = [XNet proxyOf:@"vod.p2p.com"]/domain/path/to/some.file?params=xxx
 
-    NSString *host = @"vod.p2p.com";
+    NSString* host = @"vod.p2p.com";
     if ([originUrl rangeOfString:@"m3u8"].location != NSNotFound) {
         host = @"hls.vod.p2p.com";
     }
     NSString* p2pUrl = [originUrl stringByReplacingOccurrencesOfString:@"http://" withString: [XNet proxyOf:host]];
+```
+
+sdk中默认是以http协议去请求cdn，如果要求https，需要在url中添加参数"xhttps=1"，如下：
+
+```
+    // 例如：url = https://domain/path/to/some.file?params=xxx
+    // 变成：p2pUrl = XNet.proxyOf("vod.p2p.com")/domain/path/to/some.file?params=xxx&xhttps=1
 ```
 
 需要注意，这里区分出单码率视频格式和多码率视频格式。  
@@ -87,6 +94,22 @@ armv7 armv7s arm64
 
 ```
     [XNet resume];
+```
+
+#### 设置是否允许流量上传
+
+sdk中默认允许流量上传，对于移动网络类型，用户可能不希望有流量上传，我们提供http接口可以设置，业务根据需要自行设置。
+
+```
+NSString* url = [[XNet proxyOf:@"vod.p2p.com"] stringByAppendingString:@"feature?upload=0"];
+http request
+```
+
+如上拼接出url，用http get请求即可。注意是"vod.p2p.com"，不能是其他，upload=0表示不允许上传，upload=1表示允许上传。     
+http请求到sdk，会响应json展示设置结果，示例:
+
+```
+{"ret":0,"msg":"ok","download":true,"upload":false}
 ```
 
 #### 流量统计
