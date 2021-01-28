@@ -96,6 +96,19 @@ sdk中默认是以http协议去请求cdn，如果要求https，需要在url中�
     [XNet resume];
 ```
 
+
+#### 资源唯一标识
+
+每一个点播资源都应有唯一的标识，单纯通过url，有时并不能很好地辨别2个url是否对应同一个资源，开发者最好能够在url中带上"xresid"参数，帮助p2p SDK更好地辨别资源，才能更快更好地调度、分享。
+
+开发者需要保证"xresid"能够唯一标识一个点播资源。
+
+```
+url = https://domain/path/to/some.file?xresid=aghekadujgega
+```
+
+对于hls，只需要在m3u8的url中添加xresid即可，不需要修改ts的url。
+
 #### 设置是否允许流量上传
 
 sdk中默认允许流量上传，对于移动网络类型，用户可能不希望有流量上传，我们提供http接口可以设置，业务根据需要自行设置。
