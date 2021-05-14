@@ -54,7 +54,6 @@ armv7 armv7s arm64
 
 - start 启动一个文件p2p：
 
-目前只支持按顺序下载，外部业务通过http读取顺序下载到的数据并保存。后续会支持指定路径由sdk内部乱序下载并保存到指定路径中。    
 首先拿到文件的url，通过以下方式拼接出p2pUrl，通过http请求p2pUrl即可。
 
 ```
@@ -62,8 +61,8 @@ armv7 armv7s arm64
     // 变成：p2pUrl = [XNet proxyOf:@"xdfs.p2p.com"]/domain/path/to/some.file?params=xxx&xresid=resource_id&xmode=ordered
 
     NSString *host = @"xdfs.p2p.com";
-    // xmode是sdk提供的请求方式，ordered是顺序下载。
-    NSString *xmode = @"ordered";
+    // NSString *xmode = @"multipart"; // 并发下载
+    NSString *xmode = @"ordered"; // 顺序下载
     // xresid是资源id，必须保证能唯一标识这个视频文件，相同的xresid才能互相p2p。比如根据url path等计算md5并转hex得出。
     NSString *xresid = resource_id;
     NSString* p2pUrl = [originUrl stringByReplacingOccurrencesOfString:@"http://" withString: [XNet proxyOf:host]];
@@ -98,6 +97,31 @@ sdk中默认是以http协议去请求cdn，如果要求https，需要在url中�
 ```
     [XNet resume];
 ```
+
+##### xmode
+
+xmode是sdk提供的请求方式，有2种方式：  
+1、 ordered：按照分块顺序下载，一个分块下载完成后才会下载下一个，按照分块顺序通过http响应给外部，速度较慢。    
+2、 multipart：并发下载，可以设置并发数，速度较快。分块下载顺序不固定，会优先下载有节点可以p2p的分块，按照下载顺序通过http响应给外部。
+
+其中，multipart还提供2中数据接收方式：        
+1、 外部按照[http Multipart ranges](https://developer.mozilla.org/en-US/docs/Web/HTTP/Range_requests)的方式解析http响应中的数据，拼接出完整的文件。其中boundary=xp2pmultipart
+```
+p2pUrl = [XNet proxyOf:@"xdfs.p2p.com"]/domain/path/to/some.file?params=xxx&xresid=resource_id&xmode=multipart
+```
+2、 url中使用xfilepath指定文件存放位置，sdk内部自动拼接并存放到指定位置，要保证指定的文件所在的文件夹已存在。
+
+```
+p2pUrl = [XNet proxyOf:@"xdfs.p2p.com"]/domain/path/to/some.file?params=xxx&xresid=resource_id&xmode=multipart&xfilepath=/home/test/download/some.file     
+```
+要保证"/home/test/download/"已经创建好并有权限写入，如果下载过程中http失败了，则 /home/test/download/some.file 不完整，需删除。
+
+##### 下载进度
+
+对于multipart，无论是否指定xfilepath，sdk都会将数据以http multipart range形式响应给外部，因此对于ordered或multipart，都可以用以下方式计算出下载进度：
+1. 通过http header Content-Length得到总数据长度 total
+2. 计算当前http已响应的数据长度 received
+3. 下载进度 = received / total
 
 #### 流量统计
 
