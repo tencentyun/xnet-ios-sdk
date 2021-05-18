@@ -50,6 +50,11 @@ armv7 armv7s arm64
 @end
  ```
 
+##### xresid
+
+xresid是资源id，由业务层给出，必须保证能唯一标识这个文件，相同的xresid才能互相p2p。比如根据url path等计算md5并转hex得出。  
+如果业务层没有传入xresid，sdk内部默认根据url path生成xresid。
+
 ##### 下载控制（start/stop）
 
 - start 启动一个文件p2p：
@@ -63,7 +68,7 @@ armv7 armv7s arm64
     NSString *host = @"xdfs.p2p.com";
     // NSString *xmode = @"multipart"; // 并发下载
     NSString *xmode = @"ordered"; // 顺序下载
-    // xresid是资源id，必须保证能唯一标识这个视频文件，相同的xresid才能互相p2p。比如根据url path等计算md5并转hex得出。
+    // 业务层给出xresid
     NSString *xresid = resource_id;
     NSString* p2pUrl = [originUrl stringByReplacingOccurrencesOfString:@"http://" withString: [XNet proxyOf:host]];
     p2pUrl = [[p2pUrl stringByAppendingString:@"?xresid="] stringByAppendingString:xresid];

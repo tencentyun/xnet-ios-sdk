@@ -54,7 +54,8 @@ armv7 armv7s arm64
 
 ##### xresid
 
-xresid是资源id，由业务层给出，必须保证能唯一标识这个视频文件，相同的xresid才能互相p2p。比如根据url path等计算md5并转hex得出。
+xresid是资源id，由业务层给出，必须保证能唯一标识这个视频文件，相同的xresid才能互相p2p。比如根据url path等计算md5并转hex得出。  
+如果业务层没有传入xresid，sdk内部默认根据url path生成xresid。
 
 ##### 播放控制（start/stop）
 
