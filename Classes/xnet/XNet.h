@@ -16,8 +16,7 @@
 - (void)onLogPrint:(NSString*)msg;
 @end
 
-__attribute__((visibility("default")))
-@interface XNet : NSObject
+__attribute__((visibility("default"))) @interface XNet : NSObject
 + (int)initWith:(NSString*)appId appKey:(NSString*)appKey appSecretKey:(NSString*)appSecretKey;
 + (NSString*)version;
 + (void)enableDebug;
