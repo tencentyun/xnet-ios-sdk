@@ -71,13 +71,16 @@ xresid是资源id，由业务层给出，必须保证能唯一标识这个视频
     if ([originUrl rangeOfString:@"m3u8"].location != NSNotFound) {
         host = @"hls.vod.p2p.com";
     }
-    // xmode是sdk提供的请求方式，点播需要使用ordered方式。
-    NSString *xmode = @"ordered";
+    
     // 业务层给出xresid
     NSString *xresid = resource_id;
     NSString* p2pUrl = [originUrl stringByReplacingOccurrencesOfString:@"http://" withString: [XNet proxyOf:host]];
     p2pUrl = [[p2pUrl stringByAppendingString:@"?xresid="] stringByAppendingString:xresid];
-    p2pUrl = [[p2pUrl stringByAppendingString:@"&xmode="] stringByAppendingString:xmode];
+    if (host isEqualToString:@"xdfs.p2p.com") {
+        // xmode是sdk提供的请求方式，点播需要使用ordered方式。hls不需要设置xmode
+        NSString *xmode = @"ordered";
+        p2pUrl = [[p2pUrl stringByAppendingString:@"&xmode="] stringByAppendingString:xmode];
+    }
 ```
 
 sdk中默认是以http协议去请求cdn，如果要求https，需要在url中添加参数"xhttps=1"。
