@@ -54,8 +54,8 @@ armv7 armv7s arm64
 
 ##### xresid
 
-xresid是资源id，由业务层给出，必须保证能唯一标识这个视频文件，相同的xresid才能互相p2p。比如根据url path等计算md5并转hex得出。  
-如果业务层没有传入xresid，sdk内部默认根据url path生成xresid。
+xresid是资源id，由业务层给出，必须保证能唯一标识这个文件，相同的xresid才能互相p2p。比如根据url path等计算md5并转hex得出。  
+如果业务层没有传入xresid，sdk内部默认根据url path生成xresid（这种方式要求path能唯一标识一个文件）。
 
 ##### 播放控制（start/stop）
 
@@ -116,6 +116,18 @@ sdk中默认是以http协议去请求cdn，如果要求https，需要在url中�
 
 ```
     [XNet resume];
+```
+
+#### 腾讯云CDN内部鉴权
+
+一般的CDN鉴权是由客户根据规则生成鉴权信息，添加到url的参数中，CDN收到http请求时对url中的参数进行校验。  
+如果是使用腾讯云CDN，sdk支持和腾讯云CDN根据客户appId等信息做内部鉴权，免去客户生成鉴权参数的过程，这需要2个步骤：
+
+1. 客户将使用的腾讯云CDN域名告知我们，由我们配置这些域名的CDN的鉴权。
+2. 向sdk发起http请求时，url中带上xhost参数，xhost的value是经过鉴权配置的域名，例如：
+
+```
+p2pUrl = [XNet proxyOf:@"xdfs.p2p.com"]/domain/path/to/some.file?params=xxx&xresid=resource_id&xmode=ordered&xhost=your.cdn.host.com
 ```
 
 #### 设置是否允许流量上传
