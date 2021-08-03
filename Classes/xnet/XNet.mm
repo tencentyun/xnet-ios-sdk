@@ -16,6 +16,7 @@ __weak static id<Logger> _loggger = nil;
 @implementation XNet
 
 static NSString* host = @"";
+static NSString* port = @"";
 
 + (int)initWith:(NSString*)appId appKey:(NSString*)appKey appSecretKey:(NSString*)appSecretKey {
     NSLog(@"[TencentXP2P] [qcloud] start init TencentXP2P SDK");
@@ -30,6 +31,8 @@ static NSString* host = @"";
                       [packageName UTF8String], [cacheDirectory UTF8String]);
 
     host = [[NSString alloc] initWithCString:(const char*)XP2PService::host().c_str()
+                                    encoding:NSASCIIStringEncoding];
+    port = [[NSString alloc] initWithCString:(const char*)XP2PService::port().c_str()
                                     encoding:NSASCIIStringEncoding];
     return EXIT_SUCCESS;
 }
@@ -56,15 +59,25 @@ static NSString* host = @"";
     XP2PService::alias([host UTF8String], [name UTF8String]);
 }
 
++ (void)setMaster:(NSString*)name {
+    XP2PService::setMaster([name UTF8String]);
+}
+
 + (int)resume {
     XP2PService::resume();
     host = [[NSString alloc] initWithCString:(const char*)XP2PService::host().c_str()
+                                    encoding:NSASCIIStringEncoding];
+    port = [[NSString alloc] initWithCString:(const char*)XP2PService::port().c_str()
                                     encoding:NSASCIIStringEncoding];
     return EXIT_SUCCESS;
 }
 
 + (NSString*)host {
     return host;
+}
+
++ (NSString*)port{
+    return port;
 }
 
 + (NSString*)proxyOf:(NSString*)domain {

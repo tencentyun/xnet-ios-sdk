@@ -24,7 +24,9 @@ __attribute__((visibility("default")))
 + (void)disableDebug;
 + (int)resume;
 + (NSString*)host;
++ (NSString*)port;
 + (NSString*)proxyOf:(NSString*)domain;
 + (void)alias:(NSString*)host of:(NSString*)name;
++ (void)setMaster:(NSString*)name;
 @end
 #endif /* XNet_h */
